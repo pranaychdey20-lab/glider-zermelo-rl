@@ -22,7 +22,9 @@ def draw_field(ax: plt.Axes, task: Task, cfg: dict[str, Any], t: float = 0.0, n:
     xs = np.linspace(0, L, n)
     X, Y = np.meshgrid(xs, xs, indexing="xy")
     u, v = task.field.velocity(X, Y, t)
-    ax.pcolormesh(X / KM, Y / KM, np.hypot(u, v), cmap="Blues", vmin=0, vmax=0.6, shading="auto", alpha=0.6)
+    # few discrete speed levels keep the GIF palette free for the method colours
+    ax.contourf(X / KM, Y / KM, np.hypot(u, v), levels=[0, 0.1, 0.2, 0.3, 0.4, 2.0],
+                colors=["#ffffff", "#eef3f8", "#dce7f1", "#c6d8ea", "#adc7e1"])
     ax.streamplot(X / KM, Y / KM, u, v, color="0.45", density=1.1, linewidth=0.6, arrowsize=0.7)
     ax.plot(*task.start / KM, "ko", ms=8, label="start")
     ax.add_patch(plt.Circle(task.goal / KM, cfg["domain"]["goal_radius_m"] / KM, color="gold", zorder=5))
@@ -45,16 +47,17 @@ def animate_runs(task: Task, runs: Sequence[dict[str, Any]], cfg: dict[str, Any]
     n_max = max(len(r["traj"]) for r in runs)
     frame_every = max(1, int(np.ceil(n_max / max_frames)))
     frames_idx = list(range(0, n_max, frame_every)) + [n_max - 1] * 6     # hold last frame
-    fig, (ax, axp) = plt.subplots(1, 2, figsize=(9.6, 5.4), gridspec_kw={"width_ratios": [3, 1.4]}, dpi=80)
+    fig, (ax, axp) = plt.subplots(1, 2, figsize=(8.4, 5.6), gridspec_kw={"width_ratios": [3, 1.15]}, dpi=80)
     draw_field(ax, task, cfg)
     ax.set_title(title, fontsize=10)
     lines, dots = [], []
-    for r in runs:
-        (ln,) = ax.plot([], [], color=r["color"], lw=2.2, label=r["label"])
+    for i, r in enumerate(runs):   # earlier runs drawn wider so overlapping paths stay visible
+        (ln,) = ax.plot([], [], color=r["color"], lw=max(1.6, 3.8 - 0.8 * i), label=r["label"])
         (dot,) = ax.plot([], [], "o", color=r["color"], ms=6, mec="k")
         lines.append(ln)
         dots.append(dot)
-    ax.legend(loc="upper left", fontsize=7, framealpha=0.8)
+    ax.legend(loc="upper left", fontsize=7, framealpha=0.9)
+    fig.text(0.01, 0.01, "shading: current speed (0.1 m/s steps); grey: streamlines at t=0", fontsize=7, color="0.3")
     axp.axis("off")
     txt = axp.text(0.0, 0.98, "", va="top", family="monospace", fontsize=8.5, transform=axp.transAxes)
     frames = []

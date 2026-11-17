@@ -64,6 +64,20 @@ Worked example (d0 = 27 km, T = d0/V = 90000 s, E = 0.5 W * T = 45 kJ, w_t = w_e
 2. Why does the agent need its position in the observation?
 3. Why run 8 environments in parallel inside PPO?
 
+## Stage 4: evaluation protocol
+
+**What was built.** A fixed recipe for measuring methods fairly (`docs/EVAL_PROTOCOL.md`, written before any test result existed): separate map sets for training (0-9999), decisions (validation 10000-10099) and final numbers (test 100000-100199); every method runs on the same 200 test maps; RL is trained 5 times with different seeds; numbers come with spreads and confidence intervals; every single episode is saved to `results/eval/*.csv`.
+
+**Key idea: paired comparison + bootstrap.** Compare methods on the *same* maps (map difficulty varies a lot, so unpaired averages are noisy). Bootstrap CI: resample the 200 maps with replacement 2000 times, recompute the mean each time, take the 2.5% and 97.5% quantiles.
+Worked example: per-map times (h) 20, 22, 30 -> mean 24. One resample might pick maps (1, 1, 3): mean (20+20+30)/3 = 23.3; another (3, 3, 2): 27.3. The spread of thousands of such means is the uncertainty due to *which maps* we happened to test on. The std over training seeds is a different uncertainty: *which training run* we got.
+
+**Change this and watch.** `python -m glider_rl.evaluate --summarize results/eval/test_main_baselines.csv results/eval/test_main_rl.csv --out /tmp/s.csv`, then rerun with only 20 maps' rows (filter the CSV with pandas): the CIs widen by roughly sqrt(200/20) = 3.2x.
+
+**Explain it back.**
+1. Why must test maps never be used to choose hyper-parameters or checkpoints?
+2. Why compute arrival time only on maps where every method succeeds?
+3. What is the difference between "std over seeds" and "bootstrap CI over maps"?
+
 ---
 ### Answers
 Stage 0: (1) one place to change, experiments are recorded, no hidden constants. (2) results would depend on call order, so the same seed would not give the same map. (3) it is large, machine-specific and rebuilt from requirements.txt.
@@ -73,3 +87,5 @@ Stage 1: (1) divergence = d/dx(dpsi/dy) + d/dy(-dpsi/dx) = 0 because mixed parti
 Stage 2: (1) the glider cannot cancel that cross-current, so it cannot hold that track at all. (2) the turning cost depends on the previous direction; without it Dijkstra could not charge for heading changes. (3) the plan is optimal only on the grid with frozen midpoint currents; the controller then follows it imperfectly (look-ahead, turn limit), and grid paths are slightly longer than a straight line in calm water.
 
 Stage 3: (1) it is a difference of a potential (distance), so its sum depends only on the start and end distance, not on the path taken. (2) leaving the domain is a failure; without position the agent cannot know where the walls are. (3) more varied experience per update (different maps at once) and lower-variance gradient estimates for the same wall-clock time.
+
+Stage 4: (1) the choice would be fitted to those maps, so the reported number would be optimistic and no longer an unbiased estimate. (2) a method that fails hard maps would otherwise look faster just because it is averaged over easier maps (survivorship bias). (3) seed std = how much the result depends on the random training run; bootstrap CI = how much it depends on the particular sample of test maps.
