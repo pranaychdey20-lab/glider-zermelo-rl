@@ -1,5 +1,38 @@
 # glider-zermelo-rl
 
-Energy-aware reinforcement-learning navigation of an underwater glider through synthetic ocean currents, benchmarked against straight-line and A* planning.
+Energy-aware reinforcement-learning navigation of an underwater glider through synthetic ocean currents (a Zermelo navigation variant), benchmarked against a naive straight-line heading and a classical grid planner (Dijkstra).
 
-Status: work in progress. See docs/STATUS.md.
+![3-way demo](results/figures/demo_3way_val10006.gif)
+
+*Validation map 10006, picked by a fixed rule (first validation map where straight-line fails and planner and RL both succeed). Red: straight-line (captured by an eddy). Orange: time-optimal planner. Green: PPO agent (training seed 0).*
+
+Status: research prototype (DRAFT results). See [docs/HANDOFF.md](docs/HANDOFF.md) for the honest reading of the numbers and [docs/STATUS.md](docs/STATUS.md) for the build log.
+
+## What is simulated
+- 50 x 50 km domain, glider speed 0.3 m/s through the water, 10-minute control steps, at most 400 steps.
+- Currents from stream functions (divergence-free): random Gaussian eddies + weak drift, a meandering jet, and a time-varying double gyre used only as a held-out test field.
+- Energy per step = (hotel power + turning power x |heading change|/pi) x dt. This is an assumed model, not a physical glider model (see docs/ASSUMPTIONS.md).
+
+## Quick start (CPU only)
+```bash
+python -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt && pip install -e . --no-deps
+pytest -q                                              # 44 tests
+python -m glider_rl.train --seed 0 --run my_run        # one PPO run (2M steps; measured ~19 min with 5 runs sharing 4 cores)
+python -m glider_rl.evaluate --split val --methods straight planner_time --runs my_run --out results/eval/my_eval.csv
+python run_all.py                                      # regenerate every table/figure/GIF from saved raw results
+```
+All numbers live in `configs/default.yaml`; override any of them with `--set a.b=value`.
+
+## Layout
+| path | content |
+|---|---|
+| `src/glider_rl/fields.py` | stream-function current fields, map (task) generation from a seed |
+| `src/glider_rl/dynamics.py` | glider kinematics (RK2) and the assumed energy model |
+| `src/glider_rl/env.py` | Gymnasium environment (observation and reward documented in the docstring) |
+| `src/glider_rl/baselines.py`, `planner.py` | straight-line, random, Dijkstra planner + path follower |
+| `src/glider_rl/train.py`, `experiments.py` | PPO training, all experiment runs |
+| `src/glider_rl/evaluate.py` | evaluation on fixed map splits, paired summary with bootstrap CIs |
+| `src/glider_rl/plots.py`, `animate.py`, `run_all.py` | figures and animations from saved results |
+| `results/` | raw per-episode CSVs, summaries, figures, demo trajectories, one small model (`results/models/main_s0.zip`) |
+| `docs/` | spec, protocol, assumptions, teaching notes (LEARN.md), handoff |

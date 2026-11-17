@@ -123,21 +123,24 @@ def pareto_plot(summary: pd.DataFrame, condition: str, out: Path) -> None:
 
 
 def robustness_plot(summary: pd.DataFrame, noise_levels: dict[str, float], out: Path) -> None:
-    """Success rate vs observation-noise std; baselines use true currents so they are flat."""
-    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+    """Success rate and energy ratio vs observation-noise std (baselines use true currents: flat)."""
+    fig, axes = plt.subplots(1, 2, figsize=(10, 3.8), dpi=150)
     rows = summary[summary.condition.isin(noise_levels)].copy()
     rows["noise"] = rows.condition.map(noise_levels)
-    for fam in ("straight", "planner_time", "planner_energy", "rl"):
-        d = rows[rows.method == fam].sort_values("noise")
-        if d.empty:
-            continue
-        ax.errorbar(d.noise, d.success_mean, yerr=d.success_std, color=COLORS[fam], marker=MARKERS[fam],
-                    lw=1.8, capsize=3, label=LABELS[fam], mec="white", ms=7)
-    ax.set_xlabel("std of Gaussian noise on observed currents [m/s]", color=INK)
-    ax.set_ylabel("success rate (test maps)", color=INK)
-    ax.set_title("Robustness to noisy current observations (RL bars = std over seeds)", fontsize=8)
-    _style(ax)
-    ax.legend(fontsize=7, frameon=False)
+    for ax, col, ylabel in ((axes[0], "success", "success rate (test maps)"),
+                            (axes[1], "energy_ratio", "energy / straight-line energy\n(maps both solve)")):
+        for fam in ("straight", "planner_time", "planner_energy", "rl"):
+            d = rows[rows.method == fam].sort_values("noise")
+            if d.empty:
+                continue
+            ax.errorbar(d.noise, d[f"{col}_mean"], yerr=d[f"{col}_std"], color=COLORS[fam], marker=MARKERS[fam],
+                        lw=1.8, capsize=3, label=LABELS[fam], mec="white", ms=7)
+        ax.set_xlabel("std of Gaussian noise on observed currents [m/s]", color=INK)
+        ax.set_ylabel(ylabel, color=INK)
+        _style(ax)
+    axes[0].legend(fontsize=7, frameon=False, loc="center right", bbox_to_anchor=(1.0, 0.33))
+    fig.suptitle("Robustness to noisy current observations (RL: 5 seeds, bars = std over seeds; "
+                 "baselines read true currents)", fontsize=9)
     fig.tight_layout()
     fig.savefig(out)
     plt.close(fig)
