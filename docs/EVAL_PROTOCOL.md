@@ -25,7 +25,7 @@ success (goal within 1 km before 400 steps and without leaving the domain), arri
 
 ## Aggregation (`evaluate.summarize`)
 - success rate: per training seed over the 200 maps -> mean +/- std over training seeds; 95% CI = percentile bootstrap (2000 resamples) over maps of the seed-averaged per-map success.
-- time / energy / path: only on maps where EVERY method in the comparison (every RL seed included) succeeds (strict pairing, identical maps); mean +/- std over training seeds; bootstrap CI over maps.
+- time / energy / path: only on maps where EVERY method in the comparison (every RL seed included) succeeds (strict pairing, identical maps); mean +/- std over training seeds; bootstrap CI over maps. The random policy (sanity check) is excluded from this pairing; amended 05:15 IST after the first summary showed that including it leaves only 4 common maps (no other number changed).
 - energy ratio vs straight-line: per (seed, map) where both that method and straight-line succeed; mean +/- std over seeds; bootstrap CI over maps.
 - Baselines are deterministic, so their seed std is 0.
 - Raw per-episode rows: results/eval/*.csv. Summaries are generated from these files by `run_all.py`.

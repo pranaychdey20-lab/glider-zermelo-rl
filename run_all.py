@@ -73,7 +73,10 @@ def eval_jobs() -> list[list[str]]:
 
 def load(*names: str, condition: str | None = None) -> pd.DataFrame:
     """Concatenate raw CSVs (optionally relabelling their condition)."""
-    df = pd.concat([pd.read_csv(EVAL / n) for n in names if (EVAL / n).exists()], ignore_index=True)
+    frames = [pd.read_csv(EVAL / n) for n in names if (EVAL / n).exists()]
+    if not frames:
+        return pd.DataFrame(columns=["method", "condition", "map_seed", "train_seed", "success"])
+    df = pd.concat(frames, ignore_index=True)
     if condition:
         df["condition"] = condition
     return df
@@ -96,7 +99,7 @@ def summaries() -> pd.DataFrame:
                            ignore_index=True))
     out = []
     for p in parts:
-        if p.method.str.startswith("rl").any() or p.condition.iloc[0] == "main":
+        if not p.empty and (p.method.str.startswith("rl").any() or p.condition.iloc[0] == "main"):
             out.append(summarize(p))
     s = pd.concat(out, ignore_index=True)
     s.to_csv(RES / "summary_all.csv", index=False)

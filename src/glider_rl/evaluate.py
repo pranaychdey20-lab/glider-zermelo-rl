@@ -43,8 +43,10 @@ def baseline_policy(method: str, cfg: dict[str, Any]) -> Policy:
 
 def rl_policy(run_dir: Path) -> Policy:
     """Deterministic policy from a saved PPO model."""
+    import torch
     from stable_baselines3 import PPO
 
+    torch.set_num_threads(1)
     model = PPO.load(run_dir / "model.zip", device="cpu")
     return lambda obs, env: model.predict(obs, deterministic=True)[0]
 
@@ -95,17 +97,19 @@ def _seed_stats(per_seed: pd.Series) -> tuple[float, float]:
     return float(per_seed.mean()), float(per_seed.std(ddof=1)) if len(per_seed) > 1 else 0.0
 
 
-def summarize(df: pd.DataFrame, ref: str = "straight", n_boot: int = 2000) -> pd.DataFrame:
+def summarize(df: pd.DataFrame, ref: str = "straight", n_boot: int = 2000,
+              unpaired: tuple[str, ...] = ("random",)) -> pd.DataFrame:
     """Paired summary per (condition, method).
 
     success: per-seed success rate -> mean/std over seeds; CI = bootstrap over maps of the
     seed-averaged per-map success. time/energy/path: on maps where EVERY method in the
-    condition succeeds (strict pairing; for RL, every training seed). energy_ratio: per map
+    condition succeeds (strict pairing; for RL, every training seed); methods in ``unpaired``
+    (sanity baselines such as random) do not restrict this map set. energy_ratio: per map
     energy / reference-method energy on maps where both succeed (RL: per seed).
     """
     out = []
     for cond, d in df.groupby("condition"):
-        ok_all = d.groupby("map_seed")["success"].all()
+        ok_all = d[~d.method.isin(unpaired)].groupby("map_seed")["success"].all()
         common = ok_all[ok_all].index
         ref_e = d[d.method == ref].set_index("map_seed")["energy_J"] if ref in set(d.method) else None
         ref_ok = d[d.method == ref].set_index("map_seed")["success"] if ref_e is not None else None
@@ -118,7 +122,7 @@ def summarize(df: pd.DataFrame, ref: str = "straight", n_boot: int = 2000) -> pd
             row["success_ci_lo"], row["success_ci_hi"] = bootstrap_ci(per_map, n_boot)
             for col, scale, name in (("time_s", 3600, "time_h"), ("energy_J", 1000, "energy_kJ"),
                                      ("path_m", 1000, "path_km")):
-                dc = dm[dm.map_seed.isin(common)]
+                dc = dm[dm.map_seed.isin(common) & dm.success]   # unpaired methods: own successes only
                 seed_means = dc.groupby("train_seed")[col].mean() / scale
                 row[f"{name}_mean"], row[f"{name}_std"] = _seed_stats(seed_means) if len(dc) else (np.nan, np.nan)
                 pm = dc.groupby("map_seed")[col].mean().values / scale

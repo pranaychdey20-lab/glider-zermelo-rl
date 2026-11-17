@@ -45,6 +45,7 @@ def training_curves(groups: dict[str, Sequence[Path]], out: Path, bin_steps: int
         for r in runs:
             d = pd.read_csv(Path(r) / "episodes.csv")
             d["ret"] = d[["R_time", "R_energy", "R_progress", "R_terminal"]].sum(axis=1)
+            d = d[d.timesteps < (d.timesteps.max() // bin_steps) * bin_steps]   # drop partial last bin
             d["bin"] = (d.timesteps // bin_steps + 1) * bin_steps
             per_seed.append(d.groupby("bin")[["success", "ret"]].mean())
         for ax, col in zip(axes, ("success", "ret")):
@@ -67,7 +68,7 @@ def training_curves(groups: dict[str, Sequence[Path]], out: Path, bin_steps: int
 
 def results_bars(summary: pd.DataFrame, condition: str, out: Path, title: str) -> None:
     """Small multiples: success, time, energy, energy ratio; error bars = bootstrap 95% CI over maps."""
-    s = summary[summary.condition == condition]
+    s = summary[(summary.condition == condition) & (summary.method != "random")]   # random: table only
     panels = [("success", "success rate", 1), ("time_h", "arrival time [h]\n(maps all methods solve)", 1),
               ("energy_kJ", "energy [kJ]\n(maps all methods solve)", 1),
               ("energy_ratio", "energy / straight-line energy\n(maps both solve)", 1)]
