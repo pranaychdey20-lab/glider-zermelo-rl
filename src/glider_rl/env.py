@@ -2,15 +2,18 @@
 
 Action: one float in [-1, 1] -> heading change of action * max_turn_deg this step.
 
-Observation (float32, 60 entries, all roughly O(1)):
-    [0:2]   goal vector (goal - position) / domain size              (world frame)
-    [2:4]   sin(heading), cos(heading)
-    [4:6]   local current (u, v) / glider speed                       (optionally noisy)
-    [6:56]  5x5 patch of currents (u, v) / glider speed, spacing 2 km, world frame,
-            row-major from (-2,-2) to (+2,+2) patch cells              (optionally noisy)
+Observation (float32, 62 entries, all roughly O(1)). Vectors are expressed in the
+GOAL FRAME: x-axis = direction from the glider to the goal (b = bearing to goal).
+    [0:2]   distance to goal / domain size, distance to goal / initial distance d0
+    [2:4]   sin(h - b), cos(h - b)           heading relative to the goal direction
+    [4:6]   local current (along, across) / V                         (optionally noisy)
+    [6:56]  5x5 patch of currents (along, across) / V, 2 km spacing, patch axes aligned
+            with the goal frame, row-major                          (optionally noisy)
     [56]    elapsed time / (max_steps * dt)
     [57]    energy used / maximum possible episode energy
-    [58:60] position / domain size (lets the agent see the walls; see ASSUMPTIONS.md)
+    [58:60] position / domain size (world frame; lets the agent see the walls)
+    [60:62] sin(b), cos(b)                   goal-frame orientation in the world
+See docs/ASSUMPTIONS.md for why this differs from a plain world-frame observation.
 
 Reward per step (each term logged in ``info['reward_terms']``):
     - w_time * dt / T_scale                    T_scale = d0 / V   (still-water straight time)
@@ -37,7 +40,7 @@ class GliderEnv(gym.Env):
     """Underwater-glider Zermelo navigation environment."""
 
     metadata = {"render_modes": []}
-    OBS_DIM = 60
+    OBS_DIM = 62
 
     def __init__(self, cfg: dict[str, Any], split: str = "train", kind: str | None = None,
                  map_seeds: np.ndarray | None = None, record: bool = False) -> None:
@@ -68,26 +71,36 @@ class GliderEnv(gym.Env):
         self.state: GliderState | None = None
 
     # ------------------------------------------------------------------ helpers
-    def _currents(self) -> np.ndarray:
-        """Observed local current and patch, divided by V (noise / ablation applied)."""
+    def _bearing(self) -> float:
+        d = self.task.goal - self.state.pos
+        return float(np.arctan2(d[1], d[0]))
+
+    def _currents(self, b: float) -> np.ndarray:
+        """Observed local current and patch in the goal frame, divided by V."""
         s = self.state
-        xs = np.concatenate([[s.x], s.x + self.patch_dx])
-        ys = np.concatenate([[s.y], s.y + self.patch_dy])
-        u, v = self.task.field.velocity(xs, ys, s.t)
-        cur = np.stack([u, v], axis=1)
+        c, sn = np.cos(b), np.sin(b)
+        px = c * self.patch_dx - sn * self.patch_dy          # patch axes rotated to goal frame
+        py = sn * self.patch_dx + c * self.patch_dy
+        u, v = self.task.field.velocity(np.concatenate([[s.x], s.x + px]),
+                                        np.concatenate([[s.y], s.y + py]), s.t)
         std = self.cfg["env"]["obs_noise_std_mps"]
         if std > 0:
-            cur = cur + self.np_random.normal(0.0, std, cur.shape)
+            u = u + self.np_random.normal(0.0, std, u.shape)
+            v = v + self.np_random.normal(0.0, std, v.shape)
+        cur = np.stack([c * u + sn * v, -sn * u + c * v], axis=1)   # (along, across)
         if not self.cfg["env"]["observe_current"]:
             cur = np.zeros_like(cur)
         return cur.ravel() / self.V
 
     def _obs(self) -> np.ndarray:
         s = self.state
-        goal_vec = (self.task.goal - s.pos) / self.size
+        b = self._bearing()
+        d = self.dist()
+        rel = s.heading - b
         obs = np.concatenate([
-            goal_vec, [np.sin(s.heading), np.cos(s.heading)], self._currents(),
+            [d / self.size, d / self.d0, np.sin(rel), np.cos(rel)], self._currents(b),
             [s.t / (self.max_steps * self.dt), s.energy / self.e_max], s.pos / self.size,
+            [np.sin(b), np.cos(b)],
         ])
         return np.clip(obs, -10, 10).astype(np.float32)
 

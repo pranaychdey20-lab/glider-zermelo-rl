@@ -1,0 +1,137 @@
+Exception in thread Thread-1:
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/user/glider-zermelo-rl/src/glider_rl/train.py", line 106, in <module>
+    main()
+    ~~~~^^
+  File "/home/user/glider-zermelo-rl/src/glider_rl/train.py", line 102, in main
+    print("run dir:", train(cfg, args.seed, args.run, steps))
+                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/src/glider_rl/train.py", line 84, in train
+    model.learn(total_timesteps=timesteps, callback=EpisodeLogger(out / "episodes.csv"))
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/ppo/ppo.py", line 311, in learn
+    return super().learn(
+           ~~~~~~~~~~~~~^
+        total_timesteps=total_timesteps,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        progress_bar=progress_bar,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 335, in learn
+    self.dump_logs(iteration)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/src/glider_rl/train.py", line 106, in <module>
+    main()
+    ~~~~^^
+  File "/home/user/glider-zermelo-rl/src/glider_rl/train.py", line 102, in main
+    print("run dir:", train(cfg, args.seed, args.run, steps))
+                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 298, in dump_logs
+    self.logger.dump(step=self.num_timesteps)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/src/glider_rl/train.py", line 84, in train
+    model.learn(total_timesteps=timesteps, callback=EpisodeLogger(out / "episodes.csv"))
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/logger.py", line 542, in dump
+    _format.write(self.name_to_value, self.name_to_excluded, step)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/ppo/ppo.py", line 311, in learn
+    return super().learn(
+           ~~~~~~~~~~~~~^
+        total_timesteps=total_timesteps,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        progress_bar=progress_bar,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/logger.py", line 415, in write
+    self.writer.add_scalar(key, value, step)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 335, in learn
+    self.dump_logs(iteration)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/torch/utils/tensorboard/writer.py", line 386, in add_scalar
+    self._get_file_writer().add_summary(summary, global_step, walltime)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/torch/utils/tensorboard/writer.py", line 116, in add_summary
+    self.add_event(event, global_step, walltime)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/torch/utils/tensorboard/writer.py", line 100, in add_event
+    self.event_writer.add_event(event)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 298, in dump_logs
+    self.logger.dump(step=self.num_timesteps)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/event_file_writer.py", line 117, in add_event
+    self._async_writer.write(event.SerializeToString())
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/event_file_writer.py", line 178, in write
+    self._check_worker_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/event_file_writer.py", line 212, in _check_worker_status
+    raise exception
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/logger.py", line 542, in dump
+    _format.write(self.name_to_value, self.name_to_excluded, step)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/logger.py", line 415, in write
+    self.writer.add_scalar(key, value, step)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/threading.py", line 1044, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/torch/utils/tensorboard/writer.py", line 386, in add_scalar
+    self._get_file_writer().add_summary(summary, global_step, walltime)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/torch/utils/tensorboard/writer.py", line 116, in add_summary
+    self.add_event(event, global_step, walltime)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244, in run
+    self._run()
+    ~~~~~~~~~^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/torch/utils/tensorboard/writer.py", line 100, in add_event
+    self.event_writer.add_event(event)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/event_file_writer.py", line 275, in _run
+    self._record_writer.write(data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/event_file_writer.py", line 117, in add_event
+    self._async_writer.write(event.SerializeToString())
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/record_writer.py", line 40, in write
+    self._writer.write(header + header_crc + data + footer_crc)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/event_file_writer.py", line 178, in write
+    self._check_worker_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/compat/tensorflow_stub/io/gfile.py", line 775, in write
+    self.fs.append(self.filename, file_content, self.binary_mode)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/event_file_writer.py", line 212, in _check_worker_status
+    raise exception
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/compat/tensorflow_stub/io/gfile.py", line 167, in append
+    self._write(filename, file_content, "ab" if binary_mode else "a")
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/threading.py", line 1044, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/compat/tensorflow_stub/io/gfile.py", line 171, in _write
+    with io.open(filename, mode, encoding=encoding) as f:
+         ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244, in run
+    self._run()
+    ~~~~~~~~~^^
+FileNotFoundError: [Errno 2] No such file or directory: b'/home/user/glider-zermelo-rl/results/runs/quick_s0/events.out.tfevents.1794956700.vm.1242.0'
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/event_file_writer.py", line 275, in _run
+    self._record_writer.write(data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/tensorboard/summary/writer/record_writer.py", line 40, in write
+    self._writer.write(header + header_crc + data + footer_crc)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

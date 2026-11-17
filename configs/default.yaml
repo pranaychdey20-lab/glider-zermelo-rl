@@ -69,7 +69,7 @@ planner:
 
 ppo:
   n_envs: 8
-  total_timesteps: 1000000
+  total_timesteps: 2000000
   quick_timesteps: 300000
   n_steps: 256
   batch_size: 256
@@ -80,6 +80,7 @@ ppo:
   clip_range: 0.2
   ent_coef: 0.0
   net_arch: [128, 128]
+  log_std_init: 0.0        # initial log std of the Gaussian policy
   torch_threads: 1
 
 eval:
