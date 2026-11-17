@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "glider_rl"
+version = "0.1.0"
+description = "Energy-aware RL navigation of an underwater glider through synthetic ocean currents (Zermelo variant)."
+requires-python = ">=3.10"
+dependencies = [
+  "numpy", "scipy", "matplotlib", "gymnasium", "stable-baselines3", "torch",
+  "pytest", "pyyaml", "pandas", "imageio", "imageio-ffmpeg", "tensorboard",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

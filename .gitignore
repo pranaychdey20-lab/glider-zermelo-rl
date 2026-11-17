@@ -4,9 +4,13 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+*.egg-info/
 .pytest_cache/
 runs/
 tensorboard/
 *.zip
+!results/models/*.zip
 *.ipynb_checkpoints
 results/checkpoints/
+results/tb/
+scratch/

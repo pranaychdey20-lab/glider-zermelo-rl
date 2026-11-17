@@ -1,0 +1,13 @@
+# Tested versions (Python 3.13, CPU only). torch from PyPI works on CPU; the CPU wheel index also works.
+numpy==2.5.5
+scipy==1.18.1
+matplotlib==3.11.2
+gymnasium==1.4.0
+stable-baselines3==2.9.2
+torch==2.15.0
+pytest==9.2.0
+pyyaml==6.0.3
+pandas==3.1.1
+imageio==2.38.2
+imageio-ffmpeg==0.8.1
+tensorboard==2.21.0
