@@ -6,7 +6,7 @@ __pycache__/
 venv/
 *.egg-info/
 .pytest_cache/
-runs/
+/runs/
 tensorboard/
 *.zip
 !results/models/*.zip

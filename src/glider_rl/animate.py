@@ -82,46 +82,91 @@ def animate_runs(task: Task, runs: Sequence[dict[str, Any]], cfg: dict[str, Any]
     return paths
 
 
-STYLE = {"straight": ("straight-line", "red"), "planner_time": ("planner (time)", "orange"),
-         "planner_energy": ("planner (energy)", "darkorange"), "rl": ("RL (PPO)", "green")}
+STYLE = {"straight": ("straight-line", "#c62828"), "planner_time": ("planner (time)", "#e07b00"),
+         "planner_energy": ("planner (energy)", "#8e44ad"), "rl": ("RL (PPO)", "#2e8b3e")}
 
 
-def baseline_runs(map_seed: int, methods: Sequence[str], cfg: dict[str, Any], kind: str | None = None
-                  ) -> tuple[Task, list[dict[str, Any]]]:
-    """Roll out non-learning methods on one map with trajectory recording."""
-    from .baselines import run_episode, straight_line_policy
+def record_runs(map_seed: int, methods: Sequence[str], cfg: dict[str, Any], rl_run: str | None = None,
+                kind: str | None = None) -> tuple[Task, list[dict[str, Any]]]:
+    """Roll out methods on one map with trajectory recording ('rl' needs ``rl_run``)."""
+    from .baselines import run_episode
     from .env import GliderEnv
-    from .planner import PlannerPolicy
+    from .evaluate import baseline_policy, rl_policy
+    from .utils import RESULTS_DIR
 
-    r = cfg["env"]["reward"]
-    policies = {"straight": lambda: straight_line_policy,
-                "planner_time": lambda: PlannerPolicy(cfg, 1.0, 0.0),
-                "planner_energy": lambda: PlannerPolicy(cfg, r["w_time"], r["w_energy"])}
     env = GliderEnv(cfg, kind=kind, map_seeds=np.array([map_seed]), record=True)
     runs = []
     for m in methods:
-        res = run_episode(env, policies[m](), map_seed)
+        pol = rl_policy(RESULTS_DIR / "runs" / rl_run) if m == "rl" else baseline_policy(m, cfg)
+        res = run_episode(env, pol, map_seed, seed=map_seed)
         label, color = STYLE[m]
         runs.append({**res, "label": label, "color": color, "method": m})
     return env.task, runs
 
 
+def save_runs(path: Path, map_seed: int, kind: str, runs: list[dict[str, Any]], note: str = "") -> None:
+    """Save recorded trajectories so animations can be re-rendered without any model."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    arrays = {}
+    for r in runs:
+        arrays[f"{r['method']}__traj"] = r["traj"]
+        arrays[f"{r['method']}__energy"] = r["energy_trace"]
+        arrays[f"{r['method']}__reason"] = np.array(r["reason"])
+    np.savez_compressed(path, map_seed=map_seed, kind=kind, methods=np.array([r["method"] for r in runs]),
+                        note=np.array(note), **arrays)
+
+
+def load_runs(path: Path, cfg: dict[str, Any]) -> tuple[Task, list[dict[str, Any]], str]:
+    """Inverse of ``save_runs``; the map is rebuilt from its seed and field kind."""
+    from .fields import make_task
+
+    z = np.load(path)
+    task = make_task(int(z["map_seed"]), cfg, str(z["kind"]))
+    runs = []
+    for m in z["methods"]:
+        m = str(m)
+        label, color = STYLE[m]
+        runs.append({"method": m, "label": label, "color": color, "traj": z[f"{m}__traj"],
+                     "energy_trace": z[f"{m}__energy"], "reason": str(z[f"{m}__reason"])})
+    return task, runs, str(z["note"])
+
+
+def render_saved(path: Path, cfg: dict[str, Any], out_dir: Path) -> list[Path]:
+    """Render a saved trajectory file to GIF + MP4 in ``out_dir``."""
+    task, runs, note = load_runs(path, cfg)
+    title = f"map {task.seed} ({task.kind}) {note}".strip()
+    return animate_runs(task, runs, cfg, out_dir / Path(path).stem, title)
+
+
 def main() -> None:
-    """CLI: animate baseline methods on one map."""
+    """CLI: record trajectories (needs models for 'rl') or render saved ones (no model)."""
     import argparse
 
     from .utils import RESULTS_DIR, load_config
 
-    ap = argparse.ArgumentParser(description=__doc__)
+    ap = argparse.ArgumentParser(description=main.__doc__)
     ap.add_argument("--config", default=None)
     ap.add_argument("--map", type=int, default=10003)
     ap.add_argument("--kind", default=None)
     ap.add_argument("--methods", nargs="+", default=["straight", "planner_time"])
+    ap.add_argument("--rl-run", default=None, help="results/runs/<name> to use for method 'rl'")
+    ap.add_argument("--note", default="")
+    ap.add_argument("--save", default=None, help="save trajectories to this .npz instead of rendering")
+    ap.add_argument("--render", nargs="*", default=None, help=".npz files to render")
     ap.add_argument("--out", default=str(RESULTS_DIR / "figures" / "baselines"))
     args = ap.parse_args()
     cfg = load_config(args.config)
-    task, runs = baseline_runs(args.map, args.methods, cfg, args.kind)
-    title = f"map {args.map} ({task.kind})"
+    if args.render is not None:
+        for f in args.render:
+            for p in render_saved(Path(f), cfg, Path(args.out)):
+                print("wrote", p)
+        return
+    task, runs = record_runs(args.map, args.methods, cfg, args.rl_run, args.kind)
+    if args.save:
+        save_runs(Path(args.save), args.map, task.kind, runs, args.note)
+        print("saved", args.save, [(r["method"], r["reason"]) for r in runs])
+        return
+    title = f"map {args.map} ({task.kind}) {args.note}".strip()
     for p in animate_runs(task, runs, cfg, Path(args.out), title):
         print("wrote", p)
 

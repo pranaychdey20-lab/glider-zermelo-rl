@@ -69,7 +69,7 @@ def eval_cli(args: argparse.Namespace) -> None:
         seeds = seeds[: args.max_maps]
     rows: list[dict[str, Any]] = []
     for m in args.methods:
-        tags = {"method": m, "run": m, "train_seed": -1, "condition": args.condition, "split": args.split}
+        tags = {"method": m + args.suffix, "run": m + args.suffix, "train_seed": -1, "condition": args.condition, "split": args.split}
         rows += evaluate(baseline_policy(m, base_cfg), base_cfg, seeds, args.kind, tags)
         print(f"{m}: done", flush=True)
     for run in args.runs:
@@ -144,6 +144,7 @@ def main() -> None:
     ap.add_argument("--methods", nargs="*", default=[], choices=BASELINES)
     ap.add_argument("--runs", nargs="*", default=[])
     ap.add_argument("--rl-label", default=None, help="method name for the RL runs (default 'rl')")
+    ap.add_argument("--suffix", default="", help="appended to baseline method names, e.g. _r4")
     ap.add_argument("--condition", default="main")
     ap.add_argument("--set", nargs="*", default=[], help="config overrides a.b=value (applied to RL runs too)")
     ap.add_argument("--max-maps", type=int, default=0)

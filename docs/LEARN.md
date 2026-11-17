@@ -47,6 +47,23 @@ Worked example: V = 0.3, current 0.2 m/s straight across the track: s = 0 + sqrt
 2. Why does the graph node include the arrival direction, not just the grid cell?
 3. Why can a time-optimal plan still lose to straight-line on some maps?
 
+## Stage 3: Gym environment and PPO
+
+**What was built.** A Gymnasium environment (`GliderEnv`) that passes `check_env`: each step the agent picks a heading change in [-30, +30] degrees, the simulator moves the glider 10 minutes, and returns an observation (62 numbers) and a reward. PPO from stable-baselines3 learns a neural-network policy from millions of such steps on randomly drawn training maps. Logs: `results/runs/<run>/episodes.csv` (every episode), `progress.csv` and TensorBoard events.
+
+**Key equation (reward).** Per step
+`r = -w_t dt/T - w_e e_step/E + k (d_prev - d_now)/d0 (+ bonus / - penalty at the end)`.
+Worked example (d0 = 27 km, T = d0/V = 90000 s, E = 0.5 W * T = 45 kJ, w_t = w_e = 1, k = 5): one 600 s step that turns 10 deg and closes 200 m costs time 600/90000 = 0.0067, energy (0.5 + 5*10/180)*600 / 45000 = 0.0104, earns progress 5*200/27000 = 0.037, so r = +0.020. The progress terms telescope: over the whole episode they add up to k*(1 - d_final/d0), so circling can never farm reward.
+
+**Lesson learned here.** The first observation used world-frame vectors; PPO reached only ~5% training success in 300k steps. Re-expressing the same information relative to the goal direction ("is the goal left or right of my nose?", "is the current pushing me along or across my track?") gave ~75% in 200k steps. Representation often matters more than the algorithm.
+
+**Change this and watch.** `python -m glider_rl.train --run try --quick --set env.reward.k_progress=0`: without progress shaping the agent only sees the sparse goal bonus; predict whether it learns slower, then check (not run in this build; watch `episode/success` in TensorBoard: `tensorboard --logdir results/runs`).
+
+**Explain it back.**
+1. Why does the progress-shaping term not change which policy is optimal (in the undiscounted return)?
+2. Why does the agent need its position in the observation?
+3. Why run 8 environments in parallel inside PPO?
+
 ---
 ### Answers
 Stage 0: (1) one place to change, experiments are recorded, no hidden constants. (2) results would depend on call order, so the same seed would not give the same map. (3) it is large, machine-specific and rebuilt from requirements.txt.
@@ -54,3 +71,5 @@ Stage 0: (1) one place to change, experiments are recorded, no hidden constants.
 Stage 1: (1) divergence = d/dx(dpsi/dy) + d/dy(-dpsi/dx) = 0 because mixed partial derivatives are equal. (2) No: to cancel a 0.4 m/s cross-current it needs a cross component of 0.4 m/s but its total speed is only 0.3 m/s. (3) Aiming is not the same as moving: the current adds a velocity the glider never compensates for, so it is swept around the eddy and its heading keeps chasing a goal it cannot approach.
 
 Stage 2: (1) the glider cannot cancel that cross-current, so it cannot hold that track at all. (2) the turning cost depends on the previous direction; without it Dijkstra could not charge for heading changes. (3) the plan is optimal only on the grid with frozen midpoint currents; the controller then follows it imperfectly (look-ahead, turn limit), and grid paths are slightly longer than a straight line in calm water.
+
+Stage 3: (1) it is a difference of a potential (distance), so its sum depends only on the start and end distance, not on the path taken. (2) leaving the domain is a failure; without position the agent cannot know where the walls are. (3) more varied experience per update (different maps at once) and lower-variance gradient estimates for the same wall-clock time.
