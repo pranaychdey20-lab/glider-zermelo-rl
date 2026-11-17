@@ -1,0 +1,12 @@
+.env
+*.key
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+runs/
+tensorboard/
+*.zip
+*.ipynb_checkpoints
+results/checkpoints/
