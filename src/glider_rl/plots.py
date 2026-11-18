@@ -49,13 +49,18 @@ def training_curves(groups: dict[str, Sequence[Path]], out: Path, bin_steps: int
             d["bin"] = (d.timesteps // bin_steps + 1) * bin_steps
             per_seed.append(d.groupby("bin")[["success", "ret"]].mean())
         for ax, col in zip(axes, ("success", "ret")):
+            if col == "ret" and label != next(iter(groups)):
+                continue   # returns of different reward variants are not comparable: first group only
             m = pd.concat([p[col] for p in per_seed], axis=1)
             x = m.index.values / 1e6
             mean, std = m.mean(axis=1).values, m.std(axis=1).fillna(0).values
             ax.plot(x, mean, color=color, lw=2, label=f"{label} (n={len(runs)})")
-            ax.fill_between(x, mean - std, mean + std, color=color, alpha=0.18, lw=0)
+            lo, hi = mean - std, mean + std
+            if col == "success":
+                lo, hi = np.clip(lo, 0, 1), np.clip(hi, 0, 1)
+            ax.fill_between(x, lo, hi, color=color, alpha=0.18, lw=0)
     axes[0].set_ylabel("training success rate", color=INK)
-    axes[1].set_ylabel("training episode return", color=INK)
+    axes[1].set_ylabel(f"training episode return ({next(iter(groups))})", color=INK)
     for ax in axes:
         ax.set_xlabel("environment steps [millions]", color=INK)
         _style(ax)
@@ -81,8 +86,8 @@ def results_bars(summary: pd.DataFrame, condition: str, out: Path, title: str) -
         ax.bar(x, mean, width=0.6, color=colors, edgecolor="white", linewidth=2)
         ax.errorbar(x, mean, yerr=err, fmt="none", ecolor=INK, elinewidth=1, capsize=3)
         for xi, v in zip(x, mean):
-            ax.annotate(f"{v:.2f}", (xi, 0), xytext=(0, 3), textcoords="offset points",
-                        ha="center", fontsize=7, color="white", fontweight="bold")
+            ax.annotate(f"{v:.2f}", (xi, 0), xytext=(0, 4), textcoords="offset points", rotation=90,
+                        ha="center", va="bottom", fontsize=7, color="white", fontweight="bold")
         ax.set_xticks(x, [LABELS.get(m, m) for m in s.method], rotation=30, ha="right", fontsize=7)
         ax.set_title(label, fontsize=8, color=INK)
         _style(ax)

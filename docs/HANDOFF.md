@@ -18,7 +18,7 @@ Last updated: 2026-11-18 06:10 IST (00:40 UTC). Ablation and long-training resul
 python -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt && pip install -e . --no-deps
 pytest -q
-python run_all.py                    # tables + figures + GIFs from saved results (no model needed, ~2 min)
+python run_all.py                    # tables + figures + GIFs from saved results (no model needed, ~50 s measured)
 python run_all.py --evaluate         # re-run all test evaluations from trained models (needs results/runs/*/model.zip)
 python run_all.py --full             # retrain everything (26 runs x 2M steps; estimated ~2-2.5 h on 4 cores from the measured run times) + evaluate + demos
 python -m glider_rl.experiments --group long --parallel 5   # extra 6M-step runs

@@ -118,7 +118,7 @@ def figures(s: pd.DataFrame, cfg: dict) -> None:
     FIG.mkdir(parents=True, exist_ok=True)
     runs = RES / "runs"
     groups = {"main (w_t=w_e=1)": sorted(runs.glob("main_s*"))}
-    for a in ("nocurrent", "noenergy", "fixedmap"):
+    for a in ("nocurrent", "noenergy"):   # fixed-map runs train on one map: not comparable, omitted
         groups[f"ablation: {a}"] = sorted(runs.glob(f"abl_{a}_s*"))
     groups = {k: [p for p in v if (p / "episodes.csv").exists()] for k, v in groups.items()}
     groups = {k: v for k, v in groups.items() if v}

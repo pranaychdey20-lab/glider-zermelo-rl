@@ -95,6 +95,20 @@ Worked example: per-map times (h) 20, 22, 30 -> mean 24. One resample might pick
 2. Why can success stay flat while energy rises under observation noise?
 3. Why does the Pareto sweep show almost no trade-off in this model?
 
+## Stage 6: demos and figures
+
+**What was built.** `python run_all.py` rebuilds every table, figure and animation from saved raw data only (episode CSVs, training logs, recorded trajectories), in ~50 s, with no trained model. Demo maps were chosen by a rule written in `scripts/record_demos.py` *before* looking at them (first validation map where straight-line fails and planner and RL succeed; first validation map where RL fails), so the demo is illustrative, not cherry-picked.
+
+**Key idea: separate "compute" from "present".** Expensive steps (training, evaluation) write raw data once; cheap steps (summaries, plots) read it. Anyone can re-check a number by opening the CSV it came from.
+Worked example: `results/summary.csv` row "rl", column `success_mean` = 0.804 is the mean over 5 seeds of the per-seed success rates in `results/eval/test_main_rl.csv` (0.840, 0.810, 0.775, 0.815, 0.780 -> 0.804).
+
+**Change this and watch.** Delete `results/figures/pareto.png` and run `python run_all.py`: it reappears identical. Then edit `COLORS` in `src/glider_rl/plots.py` and rerun: every figure changes consistently.
+
+**Explain it back.**
+1. Why save trajectories (.npz) instead of re-running the model each time the GIF is drawn?
+2. Why was the demo map chosen on validation maps by a fixed rule?
+3. Why does the GIF use only a few shades for the background?
+
 ---
 ### Answers
 Stage 0: (1) one place to change, experiments are recorded, no hidden constants. (2) results would depend on call order, so the same seed would not give the same map. (3) it is large, machine-specific and rebuilt from requirements.txt.
@@ -108,3 +122,5 @@ Stage 3: (1) it is a difference of a potential (distance), so its sum depends on
 Stage 4: (1) the choice would be fitted to those maps, so the reported number would be optimistic and no longer an unbiased estimate. (2) a method that fails hard maps would otherwise look faster just because it is averaged over easier maps (survivorship bias). (3) seed std = how much the result depends on the random training run; bootstrap CI = how much it depends on the particular sample of test maps.
 
 Stage 5: (1) it shows the RL advantage over straight-line disappears without current information, so the agent is genuinely exploiting the flow rather than just steering better. (2) success only needs the average direction to be right; energy counts every small heading change, and noise makes the policy's commanded heading jitter. (3) energy is mostly hotel load x time, so saving time also saves energy; the only independent part is turning, which any positive energy weight already suppresses.
+
+Stage 6: (1) figures become reproducible without the model files (which are not in git) and without re-simulating. (2) choosing the prettiest test map would mislead viewers about typical behaviour and would touch the test set. (3) GIFs have at most 256 colours per frame; a smooth colour map uses them up and the method colours get quantised (orange turned red in an early version).
