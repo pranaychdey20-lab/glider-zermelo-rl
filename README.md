@@ -16,7 +16,7 @@ Status: research prototype (DRAFT results). See [docs/HANDOFF.md](docs/HANDOFF.m
 | PPO, 5 seeds | 80.4 +/- 2.7% | 24.9 | 0.99 +/- 0.02 |
 | PPO + LR decay + KL limit (exploratory) | 85.0 +/- 2.6% | 24.4 | 0.97 +/- 0.01 |
 
-\* on the maps every method solves (120 maps; the exploratory row is from the 119-map set that also requires it to succeed); ** per-map ratio on maps both solve. RL clearly beats the naive heading but not the full-knowledge planner; energy savings are small under the assumed energy model. Details, CIs and caveats: [docs/HANDOFF.md](docs/HANDOFF.md).
+\* on the maps every method solves (120 maps; the exploratory row is from the 119-map set that also requires it to succeed); ** per-map ratio on maps both solve. RL clearly beats the naive heading but not the full-knowledge planner; energy savings are small under the assumed energy model. The exploratory row was re-checked once on 200 fresh maps (85.6% vs 82.4% for plain PPO; planner 96%). Details, CIs and caveats: [docs/HANDOFF.md](docs/HANDOFF.md).
 
 ## What is simulated
 - 50 x 50 km domain, glider speed 0.3 m/s through the water, 10-minute control steps, at most 400 steps.

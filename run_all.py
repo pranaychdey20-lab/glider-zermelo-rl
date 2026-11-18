@@ -36,9 +36,9 @@ MAIN_SEEDS = range(5)
 SUB_SEEDS = range(3)
 
 
-def ev(*args: str) -> list[str]:
+def ev(*args: str, split: str = "test") -> list[str]:
     """Command line of one evaluation job."""
-    return [sys.executable, "-m", "glider_rl.evaluate", "--split", "test", *args]
+    return [sys.executable, "-m", "glider_rl.evaluate", "--split", split, *args]
 
 
 def eval_jobs() -> list[list[str]]:
@@ -73,6 +73,13 @@ def eval_jobs() -> list[list[str]]:
                    "--out", str(EVAL / "test_long_rl.csv")))   # extra experiment (6M steps)
     jobs.append(ev("--runs", *[f"stable_s{s}" for s in MAIN_SEEDS], "--rl-label", "rl_stable",
                    "--condition", "stable", "--out", str(EVAL / "test_stable_rl.csv")))   # extra 2
+    jobs += [   # confirmatory split, used once (EVAL_PROTOCOL.md)
+        ev("--methods", "straight", "planner_time", "planner_energy", "--condition", "confirm",
+           "--out", str(EVAL / "confirm_baselines.csv"), split="confirm"),
+        ev("--runs", *main_runs, "--condition", "confirm", "--out", str(EVAL / "confirm_main_rl.csv"), split="confirm"),
+        ev("--runs", *[f"stable_s{s}" for s in MAIN_SEEDS], "--rl-label", "rl_stable", "--condition", "confirm",
+           "--out", str(EVAL / "confirm_stable_rl.csv"), split="confirm"),
+    ]
     return jobs
 
 
@@ -106,16 +113,20 @@ def summaries(n_boot: int) -> pd.DataFrame:
                             load("test_long_rl.csv")], ignore_index=True))
     parts.append(pd.concat([base_nr.assign(condition="stable"), load("test_main_rl.csv", condition="stable"),
                             load("test_stable_rl.csv")], ignore_index=True))
+    parts.append(load("confirm_baselines.csv", "confirm_main_rl.csv", "confirm_stable_rl.csv"))
     out = []
     for p in parts:
-        if not p.empty and (p.method.str.startswith("rl_").any() or p.condition.iloc[0] in ("main", "double_gyre")
+        if not p.empty and (p.method.str.startswith("rl_").any() or p.condition.iloc[0] in ("main", "double_gyre", "confirm")
                             or p.condition.iloc[0].startswith("noise")):
             out.append(summarize(p, n_boot=n_boot))
     s = pd.concat(out, ignore_index=True)
     rl = load("test_main_baselines.csv", "test_main_rl.csv", "test_stable_rl.csv", "test_long_rl.csv")
     pairs = [paired_ratios(rl, m, ref, n_boot) for m in ("rl", "rl_stable", "rl_long")
              for ref in ("planner_energy", "planner_time", "straight") if (rl.method == m).any()]
-    pd.DataFrame(pairs).to_csv(RES / "paired_ratios.csv", index=False)
+    conf = load("confirm_baselines.csv", "confirm_main_rl.csv", "confirm_stable_rl.csv")
+    pairs += [{"split": "confirm", **paired_ratios(conf, m, ref, n_boot)} for m in ("rl", "rl_stable")
+              for ref in ("planner_energy", "planner_time", "straight") if (conf.method == m).any()]
+    pd.DataFrame(pairs).fillna({"split": "test"}).to_csv(RES / "paired_ratios.csv", index=False)
     s.to_csv(RES / "summary_all.csv", index=False)
     main = s[s.condition == "main"]
     main.to_csv(RES / "summary.csv", index=False)
@@ -137,7 +148,8 @@ def figures(s: pd.DataFrame, cfg: dict) -> None:
               "double_gyre": "Held-out time-varying double gyre (200 test maps); RL = 5 seeds",
               "ablations": "Ablations on test maps (RL variants: 3 seeds each)",
               "long": "Extra: RL trained 2M (rl) vs 6M steps (rl_long), 5 seeds each, test maps",
-              "stable": "Extra: RL main (rl) vs LR decay + target KL (rl_stable), 2M steps, 5 seeds each"}
+              "stable": "Extra: RL main (rl) vs LR decay + target KL (rl_stable), 2M steps, 5 seeds each",
+              "confirm": "Confirmatory split (200 fresh maps 200000-200199, used once): main vs stable RL"}
     for cond, title in titles.items():
         if (s.condition == cond).any():
             plots.results_bars(s, cond, FIG / f"results_{cond}.png", title)
