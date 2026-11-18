@@ -78,6 +78,23 @@ Worked example: per-map times (h) 20, 22, 30 -> mean 24. One resample might pick
 2. Why compute arrival time only on maps where every method succeeds?
 3. What is the difference between "std over seeds" and "bootstrap CI over maps"?
 
+## Stage 5: experiments (Pareto, ablations, robustness)
+
+**What was built.** Twenty-one more PPO runs answering "what if?" questions, all scored on the same 200 test maps: different time-vs-energy weights (Pareto sweep), agents missing one ingredient (ablations), and the main agent under noisy sensing or in a current pattern it never saw (robustness).
+
+**Key idea: an ablation isolates a cause.** Remove one ingredient, keep everything else identical, retrain with several seeds, and compare. Measured here:
+- no current observation: success 66.8% (straight-line 65.5%, full agent 80.8% with the same 3 seeds) -> the whole RL advantage comes from seeing the currents.
+- no energy term: success 78.5% but energy 1.72x straight-line (full agent 0.99x) -> without a price on turning, the policy wiggles constantly.
+- Worked example of that energy: wiggling +-15 deg every step costs e_turn*|dh|/pi = 5 W * (30/180) = 0.83 W extra on top of 0.5 W hotel, i.e. 2.7x the power in those steps.
+- noise on observed currents (std up to 0.3 m/s): success unchanged (~81%) but energy ratio rises to 1.64: the policy averages 26 noisy samples well enough to find the goal, but reacts to the noise with extra turning.
+
+**Change this and watch.** Evaluate the main model with noise on only the patch but not the local current (edit `env._currents`), and see whether the extra turning disappears: that tells you which input the policy reacts to most.
+
+**Explain it back.**
+1. Why is "no current observation" the most informative ablation here?
+2. Why can success stay flat while energy rises under observation noise?
+3. Why does the Pareto sweep show almost no trade-off in this model?
+
 ---
 ### Answers
 Stage 0: (1) one place to change, experiments are recorded, no hidden constants. (2) results would depend on call order, so the same seed would not give the same map. (3) it is large, machine-specific and rebuilt from requirements.txt.
@@ -89,3 +106,5 @@ Stage 2: (1) the glider cannot cancel that cross-current, so it cannot hold that
 Stage 3: (1) it is a difference of a potential (distance), so its sum depends only on the start and end distance, not on the path taken. (2) leaving the domain is a failure; without position the agent cannot know where the walls are. (3) more varied experience per update (different maps at once) and lower-variance gradient estimates for the same wall-clock time.
 
 Stage 4: (1) the choice would be fitted to those maps, so the reported number would be optimistic and no longer an unbiased estimate. (2) a method that fails hard maps would otherwise look faster just because it is averaged over easier maps (survivorship bias). (3) seed std = how much the result depends on the random training run; bootstrap CI = how much it depends on the particular sample of test maps.
+
+Stage 5: (1) it shows the RL advantage over straight-line disappears without current information, so the agent is genuinely exploiting the flow rather than just steering better. (2) success only needs the average direction to be right; energy counts every small heading change, and noise makes the policy's commanded heading jitter. (3) energy is mostly hotel load x time, so saving time also saves energy; the only independent part is turning, which any positive energy weight already suppresses.
