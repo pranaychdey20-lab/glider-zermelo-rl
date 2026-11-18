@@ -42,12 +42,13 @@ def baseline_policy(method: str, cfg: dict[str, Any]) -> Policy:
 
 
 def rl_policy(run_dir: Path) -> Policy:
-    """Deterministic policy from a saved PPO model."""
+    """Deterministic policy from a saved PPO model (a run folder or a .zip file)."""
     import torch
     from stable_baselines3 import PPO
 
     torch.set_num_threads(1)
-    model = PPO.load(run_dir / "model.zip", device="cpu")
+    path = Path(run_dir)
+    model = PPO.load(path if path.suffix == ".zip" else path / "model.zip", device="cpu")
     return lambda obs, env: model.predict(obs, deterministic=True)[0]
 
 

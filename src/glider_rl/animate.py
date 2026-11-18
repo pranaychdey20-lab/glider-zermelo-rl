@@ -100,7 +100,8 @@ def record_runs(map_seed: int, methods: Sequence[str], cfg: dict[str, Any], rl_r
     env = GliderEnv(cfg, kind=kind, map_seeds=np.array([map_seed]), record=True)
     runs = []
     for m in methods:
-        pol = rl_policy(RESULTS_DIR / "runs" / rl_run) if m == "rl" else baseline_policy(m, cfg)
+        rl_path = Path(rl_run) if rl_run and rl_run.endswith(".zip") else RESULTS_DIR / "runs" / str(rl_run)
+        pol = rl_policy(rl_path) if m == "rl" else baseline_policy(m, cfg)
         res = run_episode(env, pol, map_seed, seed=map_seed)
         label, color = STYLE[m]
         runs.append({**res, "label": label, "color": color, "method": m})
@@ -152,7 +153,7 @@ def main() -> None:
     ap.add_argument("--map", type=int, default=10003)
     ap.add_argument("--kind", default=None)
     ap.add_argument("--methods", nargs="+", default=["straight", "planner_time"])
-    ap.add_argument("--rl-run", default=None, help="results/runs/<name> to use for method 'rl'")
+    ap.add_argument("--rl-run", default=None, help="run name under results/runs, or a model .zip (e.g. results/models/main_s0.zip)")
     ap.add_argument("--note", default="")
     ap.add_argument("--save", default=None, help="save trajectories to this .npz instead of rendering")
     ap.add_argument("--render", nargs="*", default=None, help=".npz files to render")

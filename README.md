@@ -21,6 +21,8 @@ pytest -q                                              # 44 tests
 python -m glider_rl.train --seed 0 --run my_run        # one PPO run (2M steps; measured ~19 min with 5 runs sharing 4 cores)
 python -m glider_rl.evaluate --split val --methods straight planner_time --runs my_run --out results/eval/my_eval.csv
 python run_all.py                                      # regenerate every table/figure/GIF from saved raw results
+# animate the committed model (training seed 0) against the baselines on any map seed:
+python -m glider_rl.animate --map 10010 --methods straight planner_time rl --rl-run results/models/main_s0.zip --out results/figures/my_demo
 ```
 All numbers live in `configs/default.yaml`; override any of them with `--set a.b=value`.
 

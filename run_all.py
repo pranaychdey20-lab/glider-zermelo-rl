@@ -84,7 +84,7 @@ def load(*names: str, condition: str | None = None) -> pd.DataFrame:
     return df
 
 
-def summaries() -> pd.DataFrame:
+def summaries(n_boot: int) -> pd.DataFrame:
     """Build every summary table from raw CSVs."""
     base = load("test_main_baselines.csv")
     base_nr = base[base.method != "random"]
@@ -105,7 +105,7 @@ def summaries() -> pd.DataFrame:
     for p in parts:
         if not p.empty and (p.method.str.startswith("rl_").any() or p.condition.iloc[0] in ("main", "double_gyre")
                             or p.condition.iloc[0].startswith("noise")):
-            out.append(summarize(p))
+            out.append(summarize(p, n_boot=n_boot))
     s = pd.concat(out, ignore_index=True)
     s.to_csv(RES / "summary_all.csv", index=False)
     main = s[s.condition == "main"]
@@ -155,9 +155,10 @@ def main() -> None:
         for job in eval_jobs():
             print(" ".join(job[2:]), flush=True)
             subprocess.run(job, check=True)
-    s = summaries()
+    cfg = load_config()
+    s = summaries(cfg["eval"]["n_bootstrap"])
     print(s[s.condition == "main"].to_string())
-    figures(s, load_config())
+    figures(s, cfg)
 
 
 if __name__ == "__main__":

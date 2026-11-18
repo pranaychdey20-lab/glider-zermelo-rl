@@ -18,8 +18,8 @@ Every modelling choice that is not dictated by the spec, and every deviation, is
 - Stream functions are evaluated analytically everywhere, including outside the domain (needed for the observation patch near walls).
 
 ## Environment / observation
-- Observation adds **normalised position (x/L, y/L)** to the spec's list, because leaving the domain is a failure and the agent otherwise cannot see the walls. 60 entries total; layout documented in `src/glider_rl/env.py`.
-- Patch: 5x5 samples, 2 km spacing (8 km x 8 km window), world-frame axes.
+- Observation adds **normalised position (x/L, y/L)** to the spec's list, because leaving the domain is a failure and the agent otherwise cannot see the walls. 62 entries total (after the goal-frame change below); layout documented in `src/glider_rl/env.py`.
+- Patch: 5x5 samples, 2 km spacing (8 km x 8 km window), axes aligned with the goal direction (see below).
 - Reward scales: T_scale = d0/V (still-water straight-line time of this episode), E_scale = e_hotel*T_scale. With w_time = w_energy = 1 the hotel energy term equals the time term numerically, so the energy term adds ~"time + turning".
 - Shaping uses the spec's form k*(d_prev - d_now)/d0 (telescopes exactly in the undiscounted return), k = 5, goal bonus 5, out-of-domain and timeout penalty 5.
 - "Straight-line" baseline = point the nose at the goal every step (subject to the 30 deg/step turn limit), no current compensation. This is the naive strategy the project wants to beat.
