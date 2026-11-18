@@ -105,10 +105,10 @@ def pareto_plot(summary: pd.DataFrame, condition: str, out: Path) -> None:
         d["ratio"] = [float(m.split("_r")[-1]) if "_r" in m else np.nan for m in d.method]
         d = d.sort_values("ratio")
         ax.errorbar(d.time_h_mean, d.energy_kJ_mean, xerr=d.time_h_std, yerr=d.energy_kJ_std,
-                    color=COLORS[fam], marker=MARKERS[fam], ms=7, lw=1.5 if len(d) > 1 else 0,
+                    color=COLORS[fam], marker=MARKERS[fam], ms=7, lw=0, elinewidth=1,
                     capsize=2, label=LABELS[fam], mec="white")
-        for _, r in d.iterrows():
-            if not np.isnan(r.ratio):
+        for k, (_, r) in enumerate(d.iterrows()):
+            if not np.isnan(r.ratio) and (fam == "rl" or k in (0, len(d) - 1)):   # planner points overlap
                 ax.annotate(f"{r.ratio:g}", (r.time_h_mean, r.energy_kJ_mean), xytext=(5, 4),
                             textcoords="offset points", fontsize=7, color=INK)
     ax.set_xlabel("mean arrival time [h]", color=INK)

@@ -34,3 +34,6 @@ success (goal within 1 km before 400 steps and without leaving the domain), arri
 - 5a Pareto: w_energy/w_time in {0, 0.25, 1, 4, 16} (w_time + w_energy = 2) x 3 seeds; planner_energy evaluated with the same weights.
 - 5b Ablations (3 seeds): no current observation; no energy term (w_energy = 0); trained on one fixed map (train seed 0) and tested on the test maps.
 - 5c Robustness: main models evaluated with Gaussian current-observation noise std 0.05, 0.1, 0.2, 0.3 m/s (no retraining); all methods on the held-out double gyre.
+
+## Extra experiment (added 2026-11-18 05:42 IST, before it was run)
+- `long`: main configuration trained for 6M steps (3x budget), 5 seeds, evaluated on the same test maps with the same summary. Question: is RL limited by the training budget? The headline RL result stays the pre-registered 2M-step one whatever this shows. Run only if compute time remains after stages 5a-5c.
