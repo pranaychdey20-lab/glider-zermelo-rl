@@ -163,7 +163,7 @@ def main() -> None:
     """CLI entry point."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config", default=None)
-    ap.add_argument("--split", default="val", choices=["train", "val", "test"])
+    ap.add_argument("--split", default="val", choices=["train", "val", "test", "confirm"])
     ap.add_argument("--kind", default=None, help="force field type, e.g. double_gyre")
     ap.add_argument("--methods", nargs="*", default=[], choices=BASELINES)
     ap.add_argument("--runs", nargs="*", default=[])

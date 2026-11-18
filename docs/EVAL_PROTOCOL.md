@@ -40,3 +40,6 @@ success (goal within 1 km before 400 steps and without leaving the domain), arri
 
 ## Extra experiment 2 (added 2026-11-18 07:22 IST, before it was run)
 - `stable`: main configuration + linear learning-rate decay to 0 + target_kl = 0.02, 2M steps, 5 seeds. Chosen ONLY from the training diagnostics of the `long` runs (policy-std collapse, rising clip fraction and KL); no validation or test result of this variant was seen before fixing it. Evaluated once on the same test maps; reported alongside, the headline RL result stays the pre-registered `main` one.
+
+## Confirmatory split (added 2026-11-18 07:58 IST, before any evaluation on it)
+- `confirm`: map seeds 200000-200199 (200 maps, same eddy/jet mixture), never used before. Evaluated exactly once with: straight, planner_time, planner_energy, `main` (5 seeds) and `stable` (5 seeds), same summary recipe. Purpose: an unbiased check of the `stable` variant, which was designed after the test results were known. Whatever the outcome, it is reported.

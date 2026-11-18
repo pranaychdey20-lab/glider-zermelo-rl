@@ -61,6 +61,7 @@ splits:                    # fixed BEFORE looking at any results
   train: [0, 9999]
   val: [10000, 10099]
   test: [100000, 100199]
+  confirm: [200000, 200199]   # used once, for the exploratory `stable` variant (EVAL_PROTOCOL.md)
 
 planner:
   grid_spacing_m: 1000.0
