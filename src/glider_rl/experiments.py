@@ -4,6 +4,7 @@ Usage:
     python -m glider_rl.experiments --group main            # 5 seeds, default config
     python -m glider_rl.experiments --group pareto ablations --parallel 4
     python -m glider_rl.experiments --group long --parallel 5   # extra: 6M-step main runs
+    python -m glider_rl.experiments --group stable --parallel 5 # extra: LR decay + target KL
     python -m glider_rl.experiments --list
 
 Each run is ``python -m glider_rl.train --run <name> --seed <s> --set ...`` in its own
@@ -55,6 +56,8 @@ def all_runs(n_main_seeds: int = 5, n_seeds: int = 3) -> list[Run]:
     for name, ov in ablations.items():
         runs += [Run(f"{name}_s{s}", s, ov, "ablations") for s in range(n_seeds)]
     runs += [Run(f"long_s{s}", s, [], "long", LONG_TIMESTEPS) for s in range(n_main_seeds)]
+    runs += [Run(f"stable_s{s}", s, ["ppo.lr_schedule=linear", "ppo.target_kl=0.02"], "stable")
+             for s in range(n_main_seeds)]
     return runs
 
 
@@ -85,7 +88,7 @@ def launch(runs: list[Run], parallel: int, timesteps: int | None) -> None:
 def main() -> None:
     """CLI entry point."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--group", nargs="*", default=["main"], choices=["main", "pareto", "ablations", "long"])
+    ap.add_argument("--group", nargs="*", default=["main"], choices=["main", "pareto", "ablations", "long", "stable"])
     ap.add_argument("--parallel", type=int, default=4)
     ap.add_argument("--timesteps", type=int, default=None, help="override ppo.total_timesteps")
     ap.add_argument("--list", action="store_true")

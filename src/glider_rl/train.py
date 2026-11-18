@@ -13,7 +13,7 @@ import argparse
 import csv
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 import torch
@@ -65,6 +65,13 @@ class EpisodeLogger(BaseCallback):
             self.fh.close()
 
 
+def learning_rate(p: dict[str, Any]) -> float | Callable[[float], float]:
+    """Constant learning rate, or linear decay to 0 (SB3 passes progress_remaining 1 -> 0)."""
+    if p["lr_schedule"] == "linear":
+        return lambda progress_remaining: p["learning_rate"] * progress_remaining
+    return p["learning_rate"]
+
+
 def train(cfg: dict[str, Any], seed: int, run: str, timesteps: int) -> Path:
     """Train one PPO agent; returns the run directory."""
     p = cfg["ppo"]
@@ -76,7 +83,8 @@ def train(cfg: dict[str, Any], seed: int, run: str, timesteps: int) -> Path:
     venv = make_vec_env(lambda: GliderEnv(cfg, split="train"), n_envs=p["n_envs"], seed=seed)
     model = PPO("MlpPolicy", venv, seed=seed, device="cpu", verbose=0,
                 n_steps=p["n_steps"], batch_size=p["batch_size"], n_epochs=p["n_epochs"],
-                learning_rate=p["learning_rate"], gamma=p["gamma"], gae_lambda=p["gae_lambda"],
+                learning_rate=learning_rate(p), target_kl=p["target_kl"],
+                gamma=p["gamma"], gae_lambda=p["gae_lambda"],
                 clip_range=p["clip_range"], ent_coef=p["ent_coef"],
                 policy_kwargs={"net_arch": list(p["net_arch"]), "log_std_init": p["log_std_init"]})
     model.set_logger(configure(str(out), ["csv", "tensorboard"]))

@@ -70,6 +70,8 @@ def eval_jobs() -> list[list[str]]:
                    "--out", str(EVAL / "test_abl_main_rl.csv")))
     jobs.append(ev("--runs", *[f"long_s{s}" for s in MAIN_SEEDS], "--rl-label", "rl_long", "--condition", "long",
                    "--out", str(EVAL / "test_long_rl.csv")))   # extra experiment (6M steps)
+    jobs.append(ev("--runs", *[f"stable_s{s}" for s in MAIN_SEEDS], "--rl-label", "rl_stable",
+                   "--condition", "stable", "--out", str(EVAL / "test_stable_rl.csv")))   # extra 2
     return jobs
 
 
@@ -101,6 +103,8 @@ def summaries(n_boot: int) -> pd.DataFrame:
                            ignore_index=True))
     parts.append(pd.concat([base_nr.assign(condition="long"), load("test_main_rl.csv", condition="long"),
                             load("test_long_rl.csv")], ignore_index=True))
+    parts.append(pd.concat([base_nr.assign(condition="stable"), load("test_main_rl.csv", condition="stable"),
+                            load("test_stable_rl.csv")], ignore_index=True))
     out = []
     for p in parts:
         if not p.empty and (p.method.str.startswith("rl_").any() or p.condition.iloc[0] in ("main", "double_gyre")
@@ -127,7 +131,8 @@ def figures(s: pd.DataFrame, cfg: dict) -> None:
     titles = {"main": "Test maps (200, eddies + jets); RL = 5 training seeds",
               "double_gyre": "Held-out time-varying double gyre (200 test maps); RL = 5 seeds",
               "ablations": "Ablations on test maps (RL variants: 3 seeds each)",
-              "long": "Extra: RL trained 2M (rl) vs 6M steps (rl_long), 5 seeds each, test maps"}
+              "long": "Extra: RL trained 2M (rl) vs 6M steps (rl_long), 5 seeds each, test maps",
+              "stable": "Extra: RL main (rl) vs LR decay + target KL (rl_stable), 2M steps, 5 seeds each"}
     for cond, title in titles.items():
         if (s.condition == cond).any():
             plots.results_bars(s, cond, FIG / f"results_{cond}.png", title)

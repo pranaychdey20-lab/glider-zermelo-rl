@@ -37,3 +37,6 @@ success (goal within 1 km before 400 steps and without leaving the domain), arri
 
 ## Extra experiment (added 2026-11-18 05:42 IST, before it was run)
 - `long`: main configuration trained for 6M steps (3x budget), 5 seeds, evaluated on the same test maps with the same summary. Question: is RL limited by the training budget? The headline RL result stays the pre-registered 2M-step one whatever this shows. Run only if compute time remains after stages 5a-5c.
+
+## Extra experiment 2 (added 2026-11-18 07:22 IST, before it was run)
+- `stable`: main configuration + linear learning-rate decay to 0 + target_kl = 0.02, 2M steps, 5 seeds. Chosen ONLY from the training diagnostics of the `long` runs (policy-std collapse, rising clip fraction and KL); no validation or test result of this variant was seen before fixing it. Evaluated once on the same test maps; reported alongside, the headline RL result stays the pre-registered `main` one.

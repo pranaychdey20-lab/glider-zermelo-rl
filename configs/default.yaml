@@ -75,6 +75,8 @@ ppo:
   batch_size: 256
   n_epochs: 10
   learning_rate: 0.0003
+  lr_schedule: constant    # constant | linear (decays to 0 over the run)
+  target_kl: null          # PPO early-stops an update's epochs when KL > 1.5 * target_kl
   gamma: 0.99
   gae_lambda: 0.95
   clip_range: 0.2
