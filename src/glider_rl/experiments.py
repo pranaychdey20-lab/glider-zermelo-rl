@@ -3,6 +3,7 @@
 Usage:
     python -m glider_rl.experiments --group main            # 5 seeds, default config
     python -m glider_rl.experiments --group pareto ablations --parallel 4
+    python -m glider_rl.experiments --group long --parallel 5   # extra: 6M-step main runs
     python -m glider_rl.experiments --list
 
 Each run is ``python -m glider_rl.train --run <name> --seed <s> --set ...`` in its own
@@ -20,6 +21,7 @@ from dataclasses import dataclass, field
 from .utils import RESULTS_DIR, load_config
 
 PARETO_RATIOS = (0.0, 0.25, 1.0, 4.0, 16.0)   # w_energy / w_time, with w_time + w_energy = 2
+LONG_TIMESTEPS = 6_000_000                     # extra experiment: 3x the main budget
 
 
 @dataclass
@@ -30,6 +32,7 @@ class Run:
     seed: int
     overrides: list[str] = field(default_factory=list)
     group: str = "main"
+    timesteps: int | None = None   # None -> ppo.total_timesteps
 
 
 def pareto_weights(ratio: float) -> tuple[float, float]:
@@ -51,6 +54,7 @@ def all_runs(n_main_seeds: int = 5, n_seeds: int = 3) -> list[Run]:
                  "abl_fixedmap": ["env.fixed_map_seed=0"]}
     for name, ov in ablations.items():
         runs += [Run(f"{name}_s{s}", s, ov, "ablations") for s in range(n_seeds)]
+    runs += [Run(f"long_s{s}", s, [], "long", LONG_TIMESTEPS) for s in range(n_main_seeds)]
     return runs
 
 
@@ -64,8 +68,8 @@ def launch(runs: list[Run], parallel: int, timesteps: int | None) -> None:
         while todo and len(active) < parallel:
             r = todo.pop(0)
             cmd = [sys.executable, "-m", "glider_rl.train", "--run", r.name, "--seed", str(r.seed)]
-            if timesteps:
-                cmd += ["--timesteps", str(timesteps)]
+            if timesteps or r.timesteps:
+                cmd += ["--timesteps", str(timesteps or r.timesteps)]
             if r.overrides:
                 cmd += ["--set", *r.overrides]
             fh = open(logs / f"{r.name}.log", "w", encoding="utf-8")
@@ -81,7 +85,7 @@ def launch(runs: list[Run], parallel: int, timesteps: int | None) -> None:
 def main() -> None:
     """CLI entry point."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--group", nargs="*", default=["main"], choices=["main", "pareto", "ablations"])
+    ap.add_argument("--group", nargs="*", default=["main"], choices=["main", "pareto", "ablations", "long"])
     ap.add_argument("--parallel", type=int, default=4)
     ap.add_argument("--timesteps", type=int, default=None, help="override ppo.total_timesteps")
     ap.add_argument("--list", action="store_true")

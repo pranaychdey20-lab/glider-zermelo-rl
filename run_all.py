@@ -68,6 +68,8 @@ def eval_jobs() -> list[list[str]]:
                        "--condition", "ablations", "--out", str(EVAL / f"test_abl_{abl}.csv")))
     jobs.append(ev("--runs", *[f"main_s{s}" for s in SUB_SEEDS], "--condition", "ablations",
                    "--out", str(EVAL / "test_abl_main_rl.csv")))
+    jobs.append(ev("--runs", *[f"long_s{s}" for s in MAIN_SEEDS], "--rl-label", "rl_long", "--condition", "long",
+                   "--out", str(EVAL / "test_long_rl.csv")))   # extra experiment (6M steps)
     return jobs
 
 
@@ -97,9 +99,12 @@ def summaries() -> pd.DataFrame:
     abl = [f"test_abl_{a}.csv" for a in ("nocurrent", "noenergy", "fixedmap")] + ["test_abl_main_rl.csv"]
     parts.append(pd.concat([base_nr.assign(condition="ablations"), load(*abl, condition="ablations")],
                            ignore_index=True))
+    parts.append(pd.concat([base_nr.assign(condition="long"), load("test_main_rl.csv", condition="long"),
+                            load("test_long_rl.csv")], ignore_index=True))
     out = []
     for p in parts:
-        if not p.empty and (p.method.str.startswith("rl").any() or p.condition.iloc[0] == "main"):
+        if not p.empty and (p.method.str.startswith("rl_").any() or p.condition.iloc[0] in ("main", "double_gyre")
+                            or p.condition.iloc[0].startswith("noise")):
             out.append(summarize(p))
     s = pd.concat(out, ignore_index=True)
     s.to_csv(RES / "summary_all.csv", index=False)
@@ -121,7 +126,8 @@ def figures(s: pd.DataFrame, cfg: dict) -> None:
         plots.training_curves(groups, FIG / "training_curves.png")
     titles = {"main": "Test maps (200, eddies + jets); RL = 5 training seeds",
               "double_gyre": "Held-out time-varying double gyre (200 test maps); RL = 5 seeds",
-              "ablations": "Ablations on test maps (RL variants: 3 seeds each)"}
+              "ablations": "Ablations on test maps (RL variants: 3 seeds each)",
+              "long": "Extra: RL trained 2M (rl) vs 6M steps (rl_long), 5 seeds each, test maps"}
     for cond, title in titles.items():
         if (s.condition == cond).any():
             plots.results_bars(s, cond, FIG / f"results_{cond}.png", title)
