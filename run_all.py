@@ -7,6 +7,7 @@
 Raw inputs: results/eval/*.csv (one row per episode), results/runs/*/episodes.csv
 (training logs), results/trajectories/*.npz (recorded demo trajectories).
 Outputs: results/summary.csv (main test table), results/summary_all.csv (every condition),
+results/paired_ratios.csv (per-map RL / baseline energy and time ratios),
 results/figures/*.png|gif|mp4.
 """
 from __future__ import annotations
@@ -23,7 +24,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from glider_rl import plots  # noqa: E402
 from glider_rl.animate import render_saved  # noqa: E402
-from glider_rl.evaluate import summarize  # noqa: E402
+from glider_rl.evaluate import paired_ratios, summarize  # noqa: E402
 from glider_rl.experiments import PARETO_RATIOS, pareto_weights  # noqa: E402
 from glider_rl.utils import load_config  # noqa: E402
 
@@ -111,6 +112,10 @@ def summaries(n_boot: int) -> pd.DataFrame:
                             or p.condition.iloc[0].startswith("noise")):
             out.append(summarize(p, n_boot=n_boot))
     s = pd.concat(out, ignore_index=True)
+    rl = load("test_main_baselines.csv", "test_main_rl.csv", "test_stable_rl.csv", "test_long_rl.csv")
+    pairs = [paired_ratios(rl, m, ref, n_boot) for m in ("rl", "rl_stable", "rl_long")
+             for ref in ("planner_energy", "planner_time", "straight") if (rl.method == m).any()]
+    pd.DataFrame(pairs).to_csv(RES / "paired_ratios.csv", index=False)
     s.to_csv(RES / "summary_all.csv", index=False)
     main = s[s.condition == "main"]
     main.to_csv(RES / "summary.csv", index=False)

@@ -1,20 +1,20 @@
 # Status
 
-Updated: 2026-11-18 04:40 IST
+Updated: 2026-11-18 07:55 IST
 
 ## Tracks
-- [ ] Track A (build): see docs/BUILD_SPEC.md
+- [x] Track A (build): see docs/BUILD_SPEC.md (stages 0-7 done; see docs/HANDOFF.md)
 - [ ] Track B (literature): see literature/
 
 ## Track A checklist
 - [x] Stage 0 setup (venv, deps, package skeleton, config)
 - [x] Stage 1 fields, dynamics, straight-line baseline, tests, first animation
-- [ ] Stage 2 classical planner
-- [ ] Stage 3 gym env + PPO
-- [ ] Stage 4 evaluation protocol
-- [ ] Stage 5 experiments (Pareto, ablations, robustness)
-- [ ] Stage 6 demos and figures, run_all.py
-- [ ] Stage 7 handoff docs
+- [x] Stage 2 classical planner
+- [x] Stage 3 gym env + PPO
+- [x] Stage 4 evaluation protocol
+- [x] Stage 5 experiments (Pareto, ablations, robustness)
+- [x] Stage 6 demos and figures, run_all.py
+- [x] Stage 7 handoff docs
 
 ## Log
 (append entries below, newest last)
@@ -28,3 +28,4 @@ Updated: 2026-11-18 04:40 IST
 - 2026-11-18 06:40 IST (01:10 UTC) Track A stage 6: run_all.py regenerates summaries, 6 PNG figures and 5 GIF+MP4 animations from raw results in ~50 s (no model). 3-way demo results/figures/demo_3way_val10006.gif (0.98 MB) + MP4, RL failure case demo_rl_failure_val10000.gif, held-out gyre demo, training curves with seed bands, bar charts (main, gyre, ablations), Pareto plot, robustness plot. Demo maps picked by a fixed rule on validation maps (scripts/record_demos.py). Colour palette validated for colour-vision deficiency; markers as secondary encoding.
 - 2026-11-18 07:20 IST (01:50 UTC) Extra pre-registered experiment `long` (main config, 6M steps, 5 seeds): test success 75.0% +/- 3.2% (CI 70.0-79.6%), i.e. WORSE than the 2M-step runs (80.4% +/- 2.7%); energy ratio 1.054 +/- 0.058 (2M: 0.994). Training success (stochastic) peaks at ~0.80 around 1-2M steps and drifts down afterwards. Diagnosis from progress.csv: policy std collapses 0.77 -> 0.04 while clip fraction rises 0.05 -> 0.2-0.29 and approx-KL spikes up to 0.57, i.e. PPO update instability with a constant learning rate and no entropy bonus, not a lack of budget. Figure: results/figures/results_long.png.
 - 2026-11-18 07:40 IST (02:10 UTC) Extra pre-registered experiment 2 `stable` (main + linear LR decay + target_kl 0.02, 2M steps, 5 seeds; variant fixed from the `long` training diagnostics only): test success 85.0% +/- 2.6% (CI 80.4-89.0%; seeds 82.5/86/89/84/83.5%) vs main 80.4% +/- 2.7%; energy ratio vs straight 0.973 +/- 0.007 (CI 0.955-0.992, a small but significant saving); time 24.4 vs 24.9 h on the 119 common maps; policy std now settles at ~0.22 with clip fraction ~0.02. Still worse than the planner: per-map paired ratios RL_stable / planner_energy on the 180 maps both solve: energy 1.033 +/- 0.006 (CI 1.016-1.069), time 1.093 +/- 0.010 (CI 1.078-1.140). Caveat: this variant was designed after the main test results were known, so its test numbers are exploratory, not confirmatory. Figure: results/figures/results_stable.png.
+- 2026-11-18 07:55 IST (02:25 UTC) Track A stage 7: docs/HANDOFF.md final (headline table, DRAFT reading, deviations, known issues, unfinished work), results/paired_ratios.csv added to run_all.py, ASSUMPTIONS/LEARN completed, 45 tests pass. NOT done: confirmatory test of the `stable` variant on fresh maps, hyper-parameter search, validation checkpoint selection, noise-aware retraining, Colab notebook. Nothing is left running.

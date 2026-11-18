@@ -1,0 +1,10 @@
+01:47:34 start stable_s0
+01:47:34 start stable_s1
+01:47:34 start stable_s2
+01:47:34 start stable_s3
+01:47:34 start stable_s4
+02:04:04 end stable_s0 rc 0
+02:04:04 end stable_s1 rc 0
+02:04:04 end stable_s2 rc 0
+02:04:04 end stable_s4 rc 0
+02:04:14 end stable_s3 rc 0

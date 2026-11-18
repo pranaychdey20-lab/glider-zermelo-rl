@@ -1,0 +1,49 @@
+pareto_r0_s0: done
+pareto_r0_s1: done
+pareto_r0_s2: done
+wrote /home/user/glider-zermelo-rl/results/eval/test_pareto_r0_rl.csv
+pareto_r0.25_s0: done
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/user/glider-zermelo-rl/src/glider_rl/evaluate.py", line 168, in <module>
+    main()
+    ~~~~^^
+  File "/home/user/glider-zermelo-rl/src/glider_rl/evaluate.py", line 164, in main
+    eval_cli(args)
+    ~~~~~~~~^^^^^^
+  File "/home/user/glider-zermelo-rl/src/glider_rl/evaluate.py", line 86, in eval_cli
+    rows += evaluate(rl_policy(run_dir), cfg, seeds, args.kind, tags)
+                     ~~~~~~~~~^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/src/glider_rl/evaluate.py", line 50, in rl_policy
+    model = PPO.load(run_dir / "model.zip", device="cpu")
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/base_class.py", line 681, in load
+    data, params, pytorch_variables = load_from_zip_file(
+                                      ~~~~~~~~~~~~~~~~~~^
+        path,
+        ^^^^^
+    ...<2 lines>...
+        print_system_info=print_system_info,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/save_util.py", line 403, in load_from_zip_file
+    file = open_path(load_path, "r", verbose=verbose, suffix="zip")
+  File "/usr/local/lib/python3.13/functools.py", line 934, in wrapper
+    return dispatch(args[0].__class__)(*args, **kw)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/save_util.py", line 291, in open_path_pathlib
+    return open_path_pathlib(path, mode, verbose, suffix)
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/save_util.py", line 272, in open_path_pathlib
+    raise error
+  File "/home/user/glider-zermelo-rl/.venv/lib/python3.13/site-packages/stable_baselines3/common/save_util.py", line 264, in open_path_pathlib
+    return open_path(path.open("rb"), mode, verbose, suffix)
+                     ~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/user/glider-zermelo-rl/results/runs/pareto_r0.25_s1/model.zip.zip'
+main_s0: done
+main_s1: done
+main_s2: done
+wrote /home/user/glider-zermelo-rl/results/eval/test_abl_main_rl.csv

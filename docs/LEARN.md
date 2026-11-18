@@ -109,6 +109,20 @@ Worked example: `results/summary.csv` row "rl", column `success_mean` = 0.804 is
 2. Why was the demo map chosen on validation maps by a fixed rule?
 3. Why does the GIF use only a few shades for the background?
 
+## Stage 7: handoff
+
+**What was built.** `docs/HANDOFF.md` (what exists, how to run, the honest reading, deviations, known issues, unfinished work), plus this file, `STATUS.md` and `ASSUMPTIONS.md`.
+
+**Key idea: say what the numbers do NOT show.** RL beat the naive baseline but lost to the planner; the energy model makes energy track time; one improvement (LR decay + KL limit) was found after seeing test results, so it is exploratory.
+Worked example of reading a CI: RL energy / straight-line energy = 0.994, CI [0.975, 1.013]. The interval contains 1.0, so "RL saves energy" is not supported. For the `stable` variant, 0.973 [0.955, 0.992] excludes 1.0: a small (about 3%) but real saving on these maps.
+
+**Change this and watch.** Re-run `python run_all.py` after deleting `results/summary.csv`: every number in HANDOFF.md should be reproducible from the regenerated tables.
+
+**Explain it back.**
+1. Why is "RL loses to the planner" not a failure of the project?
+2. Why must the `stable` result be confirmed on a fresh map set?
+3. Name two assumptions that most limit how far these results transfer to a real glider.
+
 ---
 ### Answers
 Stage 0: (1) one place to change, experiments are recorded, no hidden constants. (2) results would depend on call order, so the same seed would not give the same map. (3) it is large, machine-specific and rebuilt from requirements.txt.
@@ -124,3 +138,5 @@ Stage 4: (1) the choice would be fitted to those maps, so the reported number wo
 Stage 5: (1) it shows the RL advantage over straight-line disappears without current information, so the agent is genuinely exploiting the flow rather than just steering better. (2) success only needs the average direction to be right; energy counts every small heading change, and noise makes the policy's commanded heading jitter. (3) energy is mostly hotel load x time, so saving time also saves energy; the only independent part is turning, which any positive energy weight already suppresses.
 
 Stage 6: (1) figures become reproducible without the model files (which are not in git) and without re-simulating. (2) choosing the prettiest test map would mislead viewers about typical behaviour and would touch the test set. (3) GIFs have at most 256 colours per frame; a smooth colour map uses them up and the method colours get quantised (orange turned red in an early version).
+
+Stage 7: (1) the planner has global knowledge of the currents; quantifying the gap between local-sensing RL and a full-knowledge planner (and showing RL clearly beats the naive heading) is itself the result. (2) it was designed after the test results were known, so its test numbers may be optimistic by selection; fresh maps give an unbiased check. (3) the assumed energy model (no buoyancy pump, energy ~ time) and the 2D, perfectly known, synthetic current fields (no forecast error, no vertical structure).

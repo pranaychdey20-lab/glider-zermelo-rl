@@ -8,6 +8,16 @@ Energy-aware reinforcement-learning navigation of an underwater glider through s
 
 Status: research prototype (DRAFT results). See [docs/HANDOFF.md](docs/HANDOFF.md) for the honest reading of the numbers and [docs/STATUS.md](docs/STATUS.md) for the build log.
 
+## Results in one table (200 held-out test maps, DRAFT)
+| method | success | time [h]* | energy vs straight-line** |
+|---|---|---|---|
+| straight-line (nose at goal) | 65.5% | 26.1 | 1.00 |
+| Dijkstra planner (full current knowledge) | 95.0% | 23.5 | 0.99 |
+| PPO, 5 seeds | 80.4 +/- 2.7% | 24.9 | 0.99 +/- 0.02 |
+| PPO + LR decay + KL limit (exploratory) | 85.0 +/- 2.6% | 24.4 | 0.97 +/- 0.01 |
+
+\* on the maps every method solves (120 maps; the exploratory row is from the 119-map set that also requires it to succeed); ** per-map ratio on maps both solve. RL clearly beats the naive heading but not the full-knowledge planner; energy savings are small under the assumed energy model. Details, CIs and caveats: [docs/HANDOFF.md](docs/HANDOFF.md).
+
 ## What is simulated
 - 50 x 50 km domain, glider speed 0.3 m/s through the water, 10-minute control steps, at most 400 steps.
 - Currents from stream functions (divergence-free): random Gaussian eddies + weak drift, a meandering jet, and a time-varying double gyre used only as a held-out test field.

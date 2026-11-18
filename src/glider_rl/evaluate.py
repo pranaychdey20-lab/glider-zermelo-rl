@@ -140,6 +140,25 @@ def summarize(df: pd.DataFrame, ref: str = "straight", n_boot: int = 2000,
     return pd.DataFrame(out)
 
 
+def paired_ratios(df: pd.DataFrame, method: str, ref: str, n_boot: int = 2000) -> dict[str, Any]:
+    """Per-map energy and time ratios ``method / ref`` on maps both solve (method: per seed).
+
+    Returns mean +/- std over training seeds and a bootstrap CI over maps of the
+    seed-averaged per-map ratio.
+    """
+    r = df[df.method == ref].set_index("map_seed")
+    d = df[(df.method == method) & df.success].copy()
+    d = d[d.map_seed.map(r.success).fillna(False).astype(bool)]
+    out: dict[str, Any] = {"method": method, "ref": ref, "n_maps": d.map_seed.nunique(),
+                           "n_seeds": d.train_seed.nunique()}
+    for col, name in (("energy_J", "energy_ratio"), ("time_s", "time_ratio")):
+        d[name] = d[col].values / d.map_seed.map(r[col]).values
+        per_seed = d.groupby("train_seed")[name].mean()
+        out[f"{name}_mean"], out[f"{name}_std"] = _seed_stats(per_seed)
+        out[f"{name}_ci_lo"], out[f"{name}_ci_hi"] = bootstrap_ci(d.groupby("map_seed")[name].mean().values, n_boot)
+    return out
+
+
 def main() -> None:
     """CLI entry point."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)

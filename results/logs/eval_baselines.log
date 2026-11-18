@@ -1,0 +1,9 @@
+straight: done
+planner_time: done
+planner_energy: done
+random: done
+wrote results/eval/test_main_baselines.csv
+straight: done
+planner_time: done
+planner_energy: done
+wrote results/eval/test_gyre_baselines.csv

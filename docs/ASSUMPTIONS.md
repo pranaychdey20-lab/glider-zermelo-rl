@@ -37,3 +37,6 @@ Every modelling choice that is not dictated by the spec, and every deviation, is
 - **Pareto sweep weights**: w_energy/w_time in {0, 0.25, 1, 4, 16} with w_time + w_energy = 2, so the total cost scale stays comparable to the progress shaping and terminal terms (otherwise large w_energy would make leaving the domain early attractive). Ratio 1 is the main config (w_time = w_energy = 1), so main seeds 0-2 are reused as that Pareto point.
 - **Ablation "no energy term"** = main config with w_energy = 0 (w_time = 1); it differs from the Pareto ratio-0 point (w_time = 2) only by the time-weight scale.
 - **Fixed-map ablation** trains on train map seed 0 only.
+- **Evaluation uses 1 torch thread** per process (multi-threaded inference on 4 shared cores was ~10x slower); this does not change any result (deterministic actions).
+- **Extra experiments** (pre-registered in EVAL_PROTOCOL.md): `long` (6M steps) and `stable` (linear LR decay + target_kl 0.02). Config defaults (`ppo.lr_schedule: constant`, `ppo.target_kl: null`) keep the main runs exactly as trained.
+- **Paired RL-vs-baseline ratios** (`results/paired_ratios.csv`): per-map ratio on maps both solve, mean +/- std over training seeds, bootstrap CI over maps of the seed-averaged per-map ratio (same recipe as the energy ratio in the summary).

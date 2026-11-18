@@ -1,0 +1,6 @@
+00:23:06 run /home/user/glider-zermelo-rl/results/eval/test_pareto_r4_rl.csv
+00:23:54 run /home/user/glider-zermelo-rl/results/eval/test_pareto_r16_rl.csv
+00:37:14 run /home/user/glider-zermelo-rl/results/eval/test_abl_nocurrent.csv
+00:50:10 run /home/user/glider-zermelo-rl/results/eval/test_abl_noenergy.csv
+01:03:34 run /home/user/glider-zermelo-rl/results/eval/test_abl_fixedmap.csv
+all evals done

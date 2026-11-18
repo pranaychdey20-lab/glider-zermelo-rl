@@ -1,0 +1,14 @@
+planner_energy: done
+wrote /home/user/glider-zermelo-rl/results/eval/test_pareto_r0_planner.csv
+planner_energy: done
+wrote /home/user/glider-zermelo-rl/results/eval/test_pareto_r0.25_planner.csv
+main_s0: done
+main_s1: done
+main_s2: done
+wrote /home/user/glider-zermelo-rl/results/eval/test_pareto_r1_rl.csv
+planner_energy: done
+wrote /home/user/glider-zermelo-rl/results/eval/test_pareto_r1_planner.csv
+planner_energy: done
+wrote /home/user/glider-zermelo-rl/results/eval/test_pareto_r4_planner.csv
+planner_energy: done
+wrote /home/user/glider-zermelo-rl/results/eval/test_pareto_r16_planner.csv

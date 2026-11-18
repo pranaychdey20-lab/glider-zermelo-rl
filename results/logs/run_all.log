@@ -1,0 +1,16 @@
+  condition          method  n_seeds  n_maps  n_common_maps  success_mean  success_std  success_ci_lo  success_ci_hi  time_h_mean  time_h_std  time_h_ci_lo  time_h_ci_hi  energy_kJ_mean  energy_kJ_std  energy_kJ_ci_lo  energy_kJ_ci_hi  path_km_mean  path_km_std  path_km_ci_lo  path_km_ci_hi  energy_ratio_mean  energy_ratio_std  energy_ratio_ci_lo  energy_ratio_ci_hi  energy_ratio_n_maps
+0      main        straight        1     200            120         0.655     0.000000          0.590          0.715    26.061111     0.00000     24.642569     27.794444       47.702188       0.000000        45.116833        50.800717     27.904169     0.000000      27.130201      28.720221           1.000000          0.000000            1.000000            1.000000                  131
+1      main    planner_time        1     200            120         0.950     0.000000          0.920          0.980    23.484722     0.00000     22.377743     24.731979       45.682467       0.000000        43.558151        48.043179     28.465534     0.000000      27.517665      29.442968           0.986618          0.000000            0.962277            1.012291                  128
+2      main  planner_energy        1     200            120         0.945     0.000000          0.910          0.975    23.591667     0.00000     22.487222     24.829236       45.664460       0.000000        43.560650        48.048697     28.301417     0.000000      27.396124      29.246370           0.985070          0.000000            0.961476            1.009547                  128
+3      main          random        1     200            120         0.025     0.000000          0.005          0.050    29.250000     0.00000     17.416667     41.083333       95.264072       0.000000        56.129582       134.398563     35.259774     0.000000      24.853622      46.809295           2.893105          0.000000            2.014955            4.004924                    4
+4      main              rl        5     200            120         0.804     0.026786          0.755          0.849    24.893889     0.31845     23.663326     26.234729       46.525613       0.956275        44.202833        49.036486     28.187656     0.818871      27.279931      29.082334           0.994161          0.019763            0.974636            1.013364                  131
+wrote /home/user/glider-zermelo-rl/results/figures/demo_3way_val10006.gif
+wrote /home/user/glider-zermelo-rl/results/figures/demo_3way_val10006.mp4
+wrote /home/user/glider-zermelo-rl/results/figures/demo_heldout_gyre_test100000.gif
+wrote /home/user/glider-zermelo-rl/results/figures/demo_heldout_gyre_test100000.mp4
+wrote /home/user/glider-zermelo-rl/results/figures/demo_rl_failure_val10000.gif
+wrote /home/user/glider-zermelo-rl/results/figures/demo_rl_failure_val10000.mp4
+wrote /home/user/glider-zermelo-rl/results/figures/stage1_straight_line.gif
+wrote /home/user/glider-zermelo-rl/results/figures/stage1_straight_line.mp4
+wrote /home/user/glider-zermelo-rl/results/figures/stage2_straight_vs_planner.gif
+wrote /home/user/glider-zermelo-rl/results/figures/stage2_straight_vs_planner.mp4
